@@ -1,0 +1,15 @@
+services:
+  threads-scraper-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: threads-scraper-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8123:8123"
+    volumes:
+      - ./config:/app/config:ro
+      - ./data:/app/data
+      - ./output:/app/output
