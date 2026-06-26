@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException, Query
 
 from .scraper.parser import ThreadsParser
-from .scraper.threads_scraper import ThreadsScraper
+from .scraper.threads_scraper import InvalidUsernameError, ThreadsScraper
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
@@ -84,9 +84,13 @@ def scrape_user_threads(
         config_dir=CONFIG_DIR,
         data_dir=DATA_DIR,
     )
-    raw_items = scraper.fetch_user_threads(
-        username=normalized_username, limit=effective_limit
-    )
+    try:
+        raw_items = scraper.fetch_user_threads(
+            username=normalized_username, limit=effective_limit
+        )
+    except InvalidUsernameError as exc:
+        raise HTTPException(status_code=400, detail="invalid username") from exc
+
     items = parse_items(raw_items, username=normalized_username)
 
     return {

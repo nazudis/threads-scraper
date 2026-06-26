@@ -12,7 +12,7 @@ from scraper.exporter import Exporter
 from scraper.parser import ThreadsParser
 
 # Local imports
-from scraper.threads_scraper import ThreadsScraper
+from scraper.threads_scraper import InvalidUsernameError, ThreadsScraper
 from scraper.utils.logger import get_logger
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -92,6 +92,8 @@ def main():
             ]
             parsed_items = [p for p in parsed_items if p]  # drop None
             all_results.extend(parsed_items)
+        except InvalidUsernameError:
+            logger.error(f"Invalid username: @{username}")
         except Exception as e:
             logger.exception(f"Failed to collect for @{username}: {e}")
     if not all_results:

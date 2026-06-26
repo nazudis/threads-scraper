@@ -57,6 +57,10 @@ PAGE_HEADERS = {
 GRAPHQL_URL = "https://www.threads.net/api/graphql"
 
 
+class InvalidUsernameError(Exception):
+    """Raised when a Threads username cannot be resolved to a user ID."""
+
+
 class ThreadsScraper:
     """Fetch public Threads posts for given usernames or search keywords."""
 
@@ -262,8 +266,10 @@ class ThreadsScraper:
 
             if not user_id:
                 logger.warning(f"Could not resolve user ID for @{username} (page: {page_size} bytes)")
-                return []
+                raise InvalidUsernameError("invalid username")
 
+        except InvalidUsernameError:
+            raise
         except Exception as e:
             logger.warning(f"Failed to fetch profile page for @{username}: {e}")
             return []

@@ -5,6 +5,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from src.api_server import app
+from src.scraper.threads_scraper import InvalidUsernameError
 
 
 class ApiServerTest(unittest.TestCase):
@@ -66,6 +67,25 @@ class ApiServerTest(unittest.TestCase):
             response.json(),
             {"username": "nazu_dis", "count": 1, "items": expected_items},
         )
+
+    def test_returns_invalid_username_error_when_scraper_cannot_resolve_user(self):
+        class FakeScraper:
+            def __init__(self, settings, config_dir, data_dir):
+                pass
+
+            def fetch_user_threads(self, username, limit):
+                raise InvalidUsernameError("invalid username")
+
+        with patch.dict(os.environ, {"API_KEY": "123123"}, clear=False):
+            with patch("src.api_server.ThreadsScraper", FakeScraper):
+                client = TestClient(app)
+                response = client.get(
+                    "/",
+                    params={"username": "missing_user", "apikey": "123123"},
+                )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"detail": "invalid username"})
 
     def test_accepts_header_api_key(self):
         class FakeScraper:
