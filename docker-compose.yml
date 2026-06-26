@@ -6,7 +6,7 @@ services:
     container_name: threads-scraper-api
     restart: unless-stopped
     env_file:
-      - .env
+      - stack.env
     ports:
       - "8123:8123"
     volumes:
