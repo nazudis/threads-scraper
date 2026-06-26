@@ -61,7 +61,7 @@ def scrape_user_threads(
         default=None, description="API key. Prefer x-api-key header for production use."
     ),
     limit: Optional[int] = Query(
-        default=None, ge=1, le=100, description="Maximum posts to return."
+        default=None, ge=1, le=10, description="Maximum posts to return."
     ),
     offline: Optional[bool] = Query(
         default=None, description="Override settings.yaml use_offline."
@@ -77,7 +77,7 @@ def scrape_user_threads(
     settings = load_settings()
     if offline is not None:
         settings["use_offline"] = offline
-    effective_limit = limit or int(settings.get("limit", 50))
+    effective_limit = limit or int(settings.get("limit", 10))
 
     scraper = ThreadsScraper(
         settings=settings,
